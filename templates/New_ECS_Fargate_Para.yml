@@ -1,0 +1,92 @@
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  
+  VpcId:
+    Type: 'AWS::EC2::VPC::Id'
+    Description: Select a VPC that allows instances to access the Internet.
+  SubnetId:
+    Type: AWS::EC2::Subnet::Id
+    Description: Select at subnet in your selected VPC.
+  SecurityGroupId:
+    Type: AWS::EC2::SecurityGroup::Id
+    Description: Select Security Group in your selected VPC.
+  ImageUrl:
+    Type: String
+    Default: docker.bintray.io/jfrog/artifactory-oss:latest
+    Description: The url of a docker image that contains the application process that
+                 will handle the traffic for this service
+  HostPort:
+    Type: Number
+    Default: 8081
+    Description: Mention the Port for Host
+  ContainerPort:
+    Type: Number
+    Default: 8081
+    Description: Mention the Port for Container
+  ContainerCpu:
+    Type: Number
+    Default: 2048
+    Description: How much CPU to give the container. 1024 is 1 CPU
+  ContainerMemory:
+    Type: Number
+    Default: 4096
+    Description: How much memory in megabytes to give the container
+  DesiredCount:
+    Type: Number
+    Default: 2
+    Description: How many desired count of containers should up and running
+  NoFileDiscriptor:
+    Type: Number
+    Default: 32000
+    Description: How many number file deiscriptor wants to support per container
+
+Resources:
+  ECSCluster:
+    Type: 'AWS::ECS::Cluster'
+    Properties:
+      ClusterName: JFROGCluster
+  taskdefinition:
+    Type: 'AWS::ECS::TaskDefinition'
+    Properties:
+      ExecutionRoleArn: 'arn:aws:iam::xxxxxxxxxxxx:role/ecsTaskExecutionRole'
+      ContainerDefinitions:
+        - LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: /ecs/MyJfrog_Task
+              awslogs-region: us-east-1
+              awslogs-stream-prefix: ecs
+          PortMappings:
+            - HostPort: !Ref HostPort
+              Protocol: tcp
+              ContainerPort: !Ref ContainerPort
+          Ulimits:
+            - Name: nofile
+              SoftLimit: !Ref NoFileDiscriptor
+              HardLimit: !Ref NoFileDiscriptor
+          Image: !Ref ImageUrl
+          Name: JFROG_CONT
+      Memory: !Ref ContainerMemory
+      Family: MyJfrog_Task
+      RequiresCompatibilities:
+        - FARGATE
+      NetworkMode: awsvpc
+      Cpu: !Ref ContainerCpu
+  service:
+    Type: 'AWS::ECS::Service'
+    Properties:
+      Cluster: !Ref ECSCluster
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          SecurityGroups:
+            - !Ref SecurityGroupId
+          Subnets:
+            - !Ref SubnetId
+      DesiredCount: !Ref DesiredCount
+      LaunchType: FARGATE
+      TaskDefinition: !Ref taskdefinition
+      LoadBalancers:
+        - TargetGroupArn: arn:aws:elasticloadbalancing:us-east-1:xxxxxxxxxxxx:targetgroup/jfrog-cluster/xxxxxxxxxxxxxxxx
+          ContainerPort: !Ref ContainerPort
+          ContainerName: JFROG_CONT

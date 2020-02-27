@@ -1,0 +1,42 @@
+[
+    {
+      "ParameterKey": "VpcId",
+      "ParameterValue": "vpc-xxxxxxxxxxxxxxx"
+    },
+    {
+      "ParameterKey": "SubnetId",
+      "ParameterValue": "subnet-xxxxxxxxxxxxxxxxx"
+    },
+    {
+      "ParameterKey": "SecurityGroupId",
+      "ParameterValue": "sg-xxxxxxxxxxxxxxxxx"
+    },
+    {
+      "ParameterKey": "ImageUrl",
+      "ParameterValue": "docker.bintray.io/jfrog/artifactory-oss:latest"
+    },
+    {
+      "ParameterKey": "HostPort",
+      "ParameterValue": "8081"
+    },
+    {
+      "ParameterKey": "ContainerPort",
+      "ParameterValue": "8081"
+    },
+    {
+      "ParameterKey": "ContainerCpu",
+      "ParameterValue": "2048"
+    },
+    {
+      "ParameterKey": "ContainerMemory",
+      "ParameterValue": "4096"
+    },
+    {
+      "ParameterKey": "DesiredCount",
+      "ParameterValue": "2"
+    },
+    {
+      "ParameterKey": "NoFileDiscriptor",
+      "ParameterValue": "32000"
+    }
+]
